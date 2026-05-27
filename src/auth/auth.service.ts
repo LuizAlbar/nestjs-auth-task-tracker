@@ -54,6 +54,44 @@ export class AuthService {
 		};
 	}
 
+	async verifyEmail(token: string, res: Response) {
+		const user = await this.usersService.findByVerificationToken(token);
+
+		if (!user?.verificationToken) {
+			throw new BadRequestException("Invalid verification token");
+		}
+
+		if (
+			user.verificationTokenExpiresAt &&
+			user.verificationTokenExpiresAt < new Date()
+		) {
+			throw new BadRequestException(
+				"Verification token has expired. Please request a new one",
+			);
+		}
+
+		await this.usersService.update(user.id, {
+			isVerified: true,
+			verificationToken: null,
+			verificationTokenExpiresAt: null,
+		});
+
+		const tokens = await this.generateTokens(user);
+		await this.saveRefreshToken(user.id, tokens.refreshToken);
+		this.setRefreshTokenCookie(res, tokens.refreshToken);
+
+		return {
+			message: "Email verified succesfully. You are now logged in.",
+			accessToken: tokens.accessToken,
+			user: {
+				id: user.id,
+				email: user.email,
+				name: user.name,
+				role: user.role,
+			},
+		};
+	}
+
 	async login(dto: LoginDTO, res: Response) {
 		const user = await this.usersService.findByEmail(dto.email);
 
@@ -73,7 +111,7 @@ export class AuthService {
 			);
 		}
 
-		const tokens = await this.generateToken(user);
+		const tokens = await this.generateTokens(user);
 		await this.saveRefreshToken(user.id, tokens.refreshToken);
 		this.setRefreshTokenCookie(res, tokens.refreshToken);
 
@@ -88,7 +126,7 @@ export class AuthService {
 		};
 	}
 
-	private async generateToken(user: User) {
+	private async generateTokens(user: User) {
 		const payload = { sub: user.id, email: user.email, role: user.role };
 
 		const accessToken = await this.jwtService.signAsync(payload, {
@@ -134,7 +172,7 @@ export class AuthService {
 			throw new UnauthorizedException("Invalid refresh token");
 		}
 
-		const tokens = await this.generateToken(user);
+		const tokens = await this.generateTokens(user);
 		await this.saveRefreshToken(user.id, tokens.refreshToken);
 		this.setRefreshTokenCookie(res, refreshToken);
 
