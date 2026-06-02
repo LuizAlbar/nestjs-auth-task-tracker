@@ -6,15 +6,15 @@ import {
 	NotFoundException,
 	UnauthorizedException,
 } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
-import type { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
 import type { Response } from "express";
 import type { User } from "src/database/schema";
-import type { UsersService } from "src/users/users.service";
+import { UsersService } from "src/users/users.service";
 import type { LoginDTO } from "./dto/login.dto";
 import type { RegisterDTO } from "./dto/register.dto";
-import type { EmailService } from "./email.service";
+import { EmailService } from "./email.service";
 
 @Injectable()
 export class AuthService {
@@ -131,12 +131,12 @@ export class AuthService {
 
 		const accessToken = await this.jwtService.signAsync(payload, {
 			secret: this.configService.get("JWT_ACCESS_SECRET"),
-			expiresIn: this.configService.get("JWT_ACCESS_EXPIRES_IN "),
+			expiresIn: this.configService.get("JWT_ACCESS_EXPIRES_IN"),
 		});
 
 		const refreshToken = await this.jwtService.signAsync(payload, {
 			secret: this.configService.get("JWT_REFRESH_SECRET"),
-			expiresIn: this.configService.get("JWT_REFRESH_EXPIRES_IN "),
+			expiresIn: this.configService.get("JWT_REFRESH_EXPIRES_IN"),
 		});
 
 		return {
