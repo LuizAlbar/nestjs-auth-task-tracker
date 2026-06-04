@@ -11,7 +11,7 @@ import { CreateTaskDto } from "./dto/create-task.dto";
 @Injectable()
 export class TasksService {
 	async findAllForUser(userId: string) {
-		return db.query.users.findMany({ where: eq(tasks.userId, userId) });
+		return db.query.tasks.findMany({ where: eq(tasks.userId, userId) });
 	}
 
 	async create(userId: string, dto: CreateTaskDto) {

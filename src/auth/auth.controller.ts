@@ -16,7 +16,7 @@ import {
 	ApiOperation,
 	ApiTags,
 } from "@nestjs/swagger";
-
+import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { CurrentUser } from "src/common/decorators/current-user.decorator";
 import { Public } from "src/common/decorators/public.decorator";
@@ -52,6 +52,7 @@ export class AuthController {
 	}
 
 	// POST /api/auth/login
+	@Throttle({ default: { ttl: 60000, limit: 5 } })
 	@Public()
 	@Post("login")
 	@HttpCode(HttpStatus.OK)
@@ -108,6 +109,7 @@ export class AuthController {
 	}
 
 	// POST /api/auth/forgot-password
+	@Throttle({ default: { ttl: 60000, limit: 3 } })
 	@Public()
 	@Post("forgot-password")
 	@HttpCode(HttpStatus.OK)

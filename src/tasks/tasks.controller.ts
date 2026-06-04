@@ -42,7 +42,7 @@ export class TasksController {
 	update(
 		@CurrentUser() user: User,
 		@Param("id") id: string,
-		dto: Partial<CreateTaskDto>,
+		@Body() dto: Partial<CreateTaskDto>,
 	) {
 		return this.tasksService.update(id, user.id, dto);
 	}
